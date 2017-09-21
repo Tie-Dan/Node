@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="jquery.js"></script>
+</head>
+<body>
+
+</body>
+<script>
+    $.ajax({
+        url:'/getUser',
+        dataType:'json',
+        cache:true,
+        success(res){
+           if(!res.error){
+               $.each(res.data,(i,v)=>{
+                   $(`
+                    <div>${i}</div>
+                    <div>${v.name}</div>
+                    <div>${v.job}</div>
+                   `).appendTo('body');
+               })
+           }
+        },
+        error(){
+            alert('自己错了')
+        }
+    })
+</script>
+</html>

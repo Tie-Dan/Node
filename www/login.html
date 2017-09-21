@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="bootstrap.css">
+    <script src="jquery.js"></script>
+</head>
+<body>
+    <div class="panel panel-primary" style="width: 500px; margin: 0 auto">
+<div class="panel-heading" >
+    表单
+</div>
+<div class="panel-body">
+    <form class="form-horizontal">
+        <div class="form-group">
+            <label class="col-xs-2 control-label">用户</label>
+            <div class="col-xs-10">
+                <input id="user"class="form-control" type="text"/>
+            </div>
+        </div>
+        <div class="form-group">
+            <label  class="col-xs-2 control-label">密码</label>
+            <div class="col-xs-10">
+                <input id="password"class="form-control" type="password"/>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-xs-offset-2 col-xs-10">
+                <input type="button" value="注册" class="btn btn-primary col-xs-12" role="button" id="add"/>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-xs-offset-2 col-xs-10">
+                <input type="button" value="登录" class="btn btn-success col-xs-12" role="button" id="login"/>
+            </div>
+        </div>
+    </form>
+</div>
+</div>
+</body>
+<script>
+    //注册
+    $(()=>{
+        $('#add').on('click',()=>{
+            let user=$('#user').val();
+            let password=$('#password').val();
+            $.ajax({
+                url:'/add',
+                data:{
+                    username:user,
+                    password:password
+                },
+                success:r=>{
+                    if(!r.err){
+                        alert('注册成功');
+                    }else{
+                        alert(r.msg);
+                    }
+                }
+            })
+        })
+        //登陆:
+        $('#login').on('click',()=>{
+            $.ajax({
+                url:'/login',
+                data:{
+                    username:$('#user').val(),
+                    password:$('#password').val()
+                },
+                success:r=>{
+                    if (!r.err){
+                        alert('明天周四!登陆成功')
+                    }else{
+                        alert(r.msg)
+                    }
+                }
+            })
+        })
+    })
+</script>
+</html>

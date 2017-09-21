@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="bootstrap.css">
+    <script src="vue.js"></script>
+    <script src="jquery.js"></script>
+</head>
+<body>
+<div class="container">
+    <div class="row">
+        <form class="form-horizontal">
+            <div class="form-group">
+                <label for="username" class="control-label col-sm-2">用户名:</label>
+                <div class="col-sm-10">
+                    <input type="text" id="username" class="form-control" v-model="name">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="age" class=" col-sm-2 control-label">年  龄:</label>
+                <div class="col-sm-10">
+                    <input type="text" id="age" class="form-control" v-model="age">
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-8 text-center">
+                    <input type="button" value="添加" class="btn btn-primary" @click="add">
+                    <input type="button" value="取消" class="btn btn-danger">
+                </div>
+            </div>
+        </form>
+    </div>
+    <table class="table table-bordered table-hover">
+        <thead>
+        <tr>
+            <th class="text-center">ID</th>
+            <th class="text-center">用户名</th>
+            <th class="text-center">年龄</th>
+            <th class="text-center">操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr v-for="(i,index) in arr">
+            <td class="text-center">{{i.id}}</td>
+            <td class="text-center">{{i.name}}</td>
+            <td class="text-center">{{i.age}}</td>
+            <td class="text-center">
+                <button class="btn btn-warning btn-sm" @click="det(i.id,index)">删除</button>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+<script>
+    let vm = new Vue({
+            el:'.container',
+            data: {
+                name:'',
+                age:'',
+            arr: [
+                    {name: '张三', age: 16},
+                    {name: '李四', age: 1000},
+                 ]
+            },
+            mounted(){//Vue挂在完毕  自己去执行
+                this.getData();
+            },
+            methods:{
+                    /*增加一条数据*/
+                add(){
+                    $.ajax({
+                        url:'/add',
+                        data:{
+                            name:this.name,
+                            age:this.age
+                        }
+                    }).then((res)=>{
+                        if (res.err){
+                            alert(res.msg);
+                        }else{
+                             this.arr.push({name:this.name,age:this.age});
+                             this.name='';
+                             this.age='';
+                        }
+                    },(err)=>{
+                        alert('请求失败')
+                    })
+                },
+                /*获取数据*/
+                getData(){
+                    $.ajax({
+                        url:'/getData'
+                    }).then((res)=>{
+                        this.arr=res
+                    },(err)=>{
+                        alert(`请求数据失败!`);
+                    })
+                },
+                /*删除一条*/
+                det(n,index){
+                    $.ajax({
+                        url:'/det',
+                        data:{
+                            n
+                        }
+                    }).then((res)=>{
+                       if (!res.err){
+                           this.arr.splice(index,1)
+                       }else{
+                           alert(res.msg)
+                       }
+                    },(err)=>{
+                        alert(`删除失败`)
+                    })
+
+                }
+            }
+    })
+</script>
+</body>
+</html>

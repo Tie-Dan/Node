@@ -1,0 +1,10 @@
+sql语句:
+增加:
+    insert into  表 values(0,'小华',555);
+删除:
+    delete  from 表  where 条件;
+修改:
+    update 表 set 字段='值',... where 条件;
+查询:
+    select * from  表
+    select * from  表 where 条件
