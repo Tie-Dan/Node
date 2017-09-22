@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <script src="bower_components/vue/dist/vue.js"></script>
+
+    <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css">
+    <script src="bower_components/jquery/dist/jquery.js"></script>
+    <script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+    <style>
+        [v-cloak]{
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            <form class="form-horizontal">
+                <div class="form-group">
+                    <label for="username" class="col-sm-2 control-label">用户名:</label>
+                    <div class="col-sm-8">
+                        <input id="username" v-model="username" type="text" class="form-control">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="age" class="col-sm-2 control-label">年　龄:</label>
+                    <div class="col-sm-8">
+                        <input id="age" v-model="age" type="text" class="form-control">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-8 text-center">
+                        <input type="button" @click="addMsg" value="添加" class="btn btn-primary">
+                        <input type="reset" value="取消" class="btn btn-danger">
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <hr>
+        <!-- 分页代码 -->
+        <nav class="pull-right" aria-label="Page navigation">
+          <ul class="pagination">
+            <li @click="fnPrevPage()">
+              <a href="#" aria-label="Previous">
+                <span aria-hidden="true">&laquo;</span>
+              </a>
+            </li>
+            <li @click="getPageData(n)" :class="{active:n==nowPage}" v-for="n in pageCount"><a href="#">{{n}}</a></li>
+            <li @click="fnNextPage()">
+              <a href="#" aria-label="Next">
+                <span aria-hidden="true">&raquo;</span>
+              </a>
+            </li>
+          </ul>
+        </nav>
+        <!--表格展示数据-->
+        <table class="table table-bordered table-hover">
+            <thead>
+                <tr>
+                    <th class="text-center">ID</th>
+                    <th class="text-center">用户名</th>
+                    <th class="text-center">年龄</th>
+                    <th class="text-center">操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-show="msgList.length==0">
+                    <td colspan="4" class="text-center text-danger">
+                        暂无留言....
+                    </td>
+                </tr>
+                <tr class="text-center" v-for="(item,index) in msgList" v-cloak>
+                    <td>{{item.ID}}</td>
+                    <td>{{item.name}}</td>
+                    <td>{{item.age}}</td>
+                    <td>
+                        <button data-toggle="modal" data-target=".my-modal" class="btn btn-warning btn-sm" @click="changeIndex(index,item.ID)">删除</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!--模态框-->
+        <div class="modal fade my-modal">
+            <div class="modal-dialog modal-sm" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title" id="myModalLabel">确认删除么?</h4>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                        <button type="button" data-dismiss="modal" class="btn btn-primary" @click="delMsg(nowIndex,id)">确认</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        new Vue({
+            el:'.container',
+            data:{
+                username:'',
+                age:'',
+                msgList:[],
+                nowIndex:-1,
+                pageCount:0,  //总页数
+                nowPage:1,   //当前第几页
+                id:0
+            },
+            mounted(){  //vue组件挂在完毕之后，自己执行
+                this.getPageData();
+                this.getPageCount();
+            },
+            methods:{
+                //左
+                fnPrevPage(){
+                    this.nowPage=this.nowPage-1;
+                    if(this.nowPage==0){
+                        this.nowPage=1;
+                    }
+                    this.getPageData(this.nowPage);
+                },
+                //右
+                fnNextPage(){
+                    this.nowPage=this.nowPage+1;
+                    if(this.nowPage>this.pageCount){
+                        this.nowPage=this.pageCount;
+                    }
+                    this.getPageData(this.nowPage);
+                },
+                //获取页数
+                getPageCount(){
+                    $.ajax({
+                        url:'/getPageCount'
+                    }).then(res=>{
+                        this.pageCount=res.count;
+                    })
+                },
+                //获取数据
+                getPageData(n=1){
+                    this.nowPage=n;
+                    $.ajax({
+                        url:'/getPageData',
+                        data:{
+                            page:n
+                        }
+                    }).then(res=>{
+                        this.msgList=res;
+                    })
+                },
+                //增加数据
+                addMsg(){
+                    $.ajax({
+                        url:'/addMsg',
+                        data:{
+                            name:this.username,
+                            age:this.age
+                        }
+                    }).then(res=>{
+                        if(res.err){
+                            alert(res.msg);
+                        }else{
+                            this.msgList.unshift({
+                                ID:res.ID,
+                                name:this.username,
+                                age:this.age
+                            });
+
+                            this.username='';
+                            this.age='';
+
+                            if(this.msgList.length>5){
+                                this.msgList.pop();
+                            }
+                            this.getPageCount();
+                        } 
+                    })
+                },
+                changeIndex(n,id){
+                    this.nowIndex=n;
+                    this.id=id;
+                },
+                //删除数据
+                delMsg(n,id){
+                    $.ajax({
+                        url:'/delMsg',
+                        data:{
+                            id:id
+                        }
+                    }).then(res=>{
+                        if(!res.err){
+                            this.msgList.splice(n,1);
+                        }
+                        this.getPageData(1);
+                        this.getPageCount();
+                    })
+                }
+            }
+        });
+    </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
